@@ -2,7 +2,7 @@
 <html lang="ru" class="scroll-smooth">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
   <title>Хвойный мир — Саженцы хвойных пород, голубики и декоративных культур</title>
   <meta name="description" content="Мини-питомник растений в Великом Новгороде. Здоровые саженцы хвойных пород, голубики, клубники и трав с закрытой корневой системой (ЗКС). Доставка по РФ.">
   <link rel="icon" type="image/png" sizes="192x192" href="assets/favicon.png">
@@ -19,6 +19,14 @@
     tailwind.config = {
       theme: {
         extend: {
+          screens: {
+            'xs': '380px',
+            'sm': '640px',
+            'md': '768px',
+            'lg': '1024px',
+            'xl': '1280px',
+            '2xl': '1536px'
+          },
           colors: {
             pine: {
               950: '#081c13',
@@ -62,6 +70,11 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,500;1,600&display=swap" rel="stylesheet">
   
   <style>
+    html, body {
+      overflow-x: hidden;
+      width: 100%;
+      position: relative;
+    }
     body {
       background-color: #f8faf7;
       color: #192921;
@@ -69,6 +82,21 @@
     }
     .font-serif-title {
       font-family: 'Playfair Display', Georgia, serif;
+    }
+    /* Touch-friendly smooth scrolling & no scrollbar utilities */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    @keyframes slideDownDrawer {
+      from { transform: translateY(-10px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    .animate-slide-down {
+      animation: slideDownDrawer 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
     /* Elegant Subtle Scrollbar */
     ::-webkit-scrollbar {
@@ -126,32 +154,32 @@
 <body class="selection:bg-pine-100 selection:text-pine-900 min-h-screen flex flex-col antialiased">
 
   <!-- TOP ANNOUNCEMENT BANNER -->
-  <div id="topBanner" class="bg-pine-850 text-pine-100 py-2.5 px-4 text-center text-xs md:text-sm flex items-center justify-center gap-2 border-b border-pine-700/40">
-    <span class="inline-flex items-center justify-center w-2 h-2 rounded-full bg-emerald-400"></span>
-    <span id="topBannerText">🌿 <strong>Бесплатная доставка по Великому Новгороду</strong> при заказе от <span class="free-delivery-threshold-text">1 500 ₽</span> • Отправляем по всей России (СДЭК / Почта РФ)</span>
+  <div id="topBanner" class="bg-pine-850 text-pine-100 py-2 px-3 sm:py-2.5 sm:px-4 text-center text-[11px] sm:text-xs md:text-sm flex items-center justify-center gap-2 border-b border-pine-700/40">
+    <span class="inline-flex items-center justify-center w-2 h-2 rounded-full bg-emerald-400 shrink-0"></span>
+    <span id="topBannerText" class="text-center leading-snug">🌿 <strong>Бесплатная доставка по В. Новгороду</strong> от <span class="free-delivery-threshold-text">1 500 ₽</span> • Отправка по РФ (СДЭК / Почта)</span>
   </div>
 
   <!-- NAVIGATION HEADER -->
   <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-botanic-border shadow-xs transition-all duration-200">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-2 sm:gap-4">
       
       <!-- Brand Logo with real VK group avatar -->
-      <a href="#hero" onclick="handleSecretAdminTrigger(event)" class="flex items-center gap-3 shrink-0 group select-none" title="Питомник Хвойный мир">
-        <div class="relative w-12 h-12 rounded-2xl overflow-hidden border-2 border-pine-200/90 bg-[#092218] p-1 flex items-center justify-center shrink-0 group-hover:shadow-md transition-all duration-200">
+      <a href="#hero" onclick="handleSecretAdminTrigger(event)" class="flex items-center gap-2 sm:gap-3 shrink-0 group select-none" title="Питомник Хвойный мир">
+        <div class="relative w-10 h-10 sm:w-12 sm:h-12 rounded-2xl overflow-hidden border-2 border-pine-200/90 bg-[#092218] p-1 flex items-center justify-center shrink-0 group-hover:shadow-md transition-all duration-200">
           <img src="assets/favicon.png" 
                alt="Хвойный мир" 
                class="w-full h-full object-contain rounded-xl">
         </div>
         <div class="flex flex-col justify-center">
-          <div class="flex items-center gap-2">
-            <span class="font-extrabold text-lg sm:text-xl text-pine-900 tracking-tight whitespace-nowrap group-hover:text-pine-700 transition-colors leading-tight">Хвойный мир</span>
-            <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-pine-50 text-pine-800 border border-pine-200/90 whitespace-nowrap leading-tight">Питомник</span>
+          <div class="flex items-center gap-1.5 sm:gap-2">
+            <span class="font-extrabold text-base sm:text-xl text-pine-900 tracking-tight whitespace-nowrap group-hover:text-pine-700 transition-colors leading-tight">Хвойный мир</span>
+            <span class="text-[9px] sm:text-[10px] uppercase font-bold tracking-wider px-1.5 sm:px-2 py-0.5 rounded-full bg-pine-50 text-pine-800 border border-pine-200/90 whitespace-nowrap leading-tight">Питомник</span>
           </div>
-          <p class="text-xs text-botanic-muted whitespace-nowrap hidden sm:block">Здоровые саженцы для вашей дачи и сада</p>
+          <p class="text-[11px] sm:text-xs text-botanic-muted whitespace-nowrap hidden lg:block">Здоровые саженцы для вашей дачи и сада</p>
         </div>
       </a>
 
-      <!-- Quick Nav Links (with whitespace-nowrap so text NEVER wraps onto 2 lines) -->
+      <!-- Quick Nav Links (Desktop) -->
       <nav class="hidden xl:flex items-center gap-7 text-sm font-semibold text-stone-700">
         <a href="#catalog" class="whitespace-nowrap hover:text-pine-800 transition-colors py-1.5">Каталог</a>
         <a href="#calculator" class="whitespace-nowrap hover:text-pine-800 transition-colors py-1.5">Калькулятор изгороди</a>
@@ -160,26 +188,79 @@
         <a href="#contacts" class="whitespace-nowrap hover:text-pine-800 transition-colors py-1.5">Контакты</a>
       </nav>
 
-      <!-- Action Buttons & Cart (Strictly uniform h-11 height, exact vertical centering, and crisp border-2) -->
-      <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+      <!-- Action Buttons & Cart -->
+      <div class="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
         <!-- Direct Phone Button -->
-        <a href="tel:+79602036065" id="headerPhoneLink" class="h-11 hidden sm:inline-flex items-center gap-2 whitespace-nowrap text-xs md:text-sm font-bold px-4 rounded-xl bg-pine-50 hover:bg-pine-100 text-pine-900 border-2 border-pine-200 hover:border-pine-400 transition-all shadow-xs leading-none shrink-0" title="Позвонить в питомник">
+        <a href="tel:+79602036065" id="headerPhoneLink" class="h-9 sm:h-11 hidden sm:inline-flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap text-xs md:text-sm font-bold px-2.5 sm:px-4 rounded-xl bg-pine-50 hover:bg-pine-100 text-pine-900 border-2 border-pine-200 hover:border-pine-400 transition-all shadow-xs leading-none shrink-0" title="Позвонить в питомник">
           <svg class="w-4 h-4 text-pine-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
-          <span id="headerPhoneText">+7 (960) 203-60-65</span>
+          <span id="headerPhoneText" class="hidden md:inline">+7 (960) 203-60-65</span>
         </a>
 
         <!-- Telegram Pill Button -->
-        <a href="https://t.me/hvoinyimir" id="headerTgLink" target="_blank" rel="noopener noreferrer" class="h-11 w-11 inline-flex items-center justify-center rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-700 border-2 border-sky-200 hover:border-sky-400 transition-all shadow-xs shrink-0" title="Наш Telegram-канал">
-          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>
+        <a href="https://t.me/hvoinyimir" id="headerTgLink" target="_blank" rel="noopener noreferrer" class="h-9 w-9 sm:h-11 sm:w-11 hidden sm:inline-flex items-center justify-center rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-700 border-2 border-sky-200 hover:border-sky-400 transition-all shadow-xs shrink-0" title="Наш Telegram-канал">
+          <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>
         </a>
 
         <!-- Cart Trigger Button -->
-        <button id="cartBtn" onclick="openCart()" class="h-11 relative inline-flex items-center gap-2.5 px-4 rounded-xl bg-pine-850 hover:bg-pine-800 active:scale-95 text-white font-bold text-xs sm:text-sm border-2 border-pine-700 hover:border-emerald-400 transition-all shadow-sm shrink-0 cursor-pointer">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+        <button id="cartBtn" onclick="openCart()" class="h-9 sm:h-11 relative inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 rounded-xl bg-pine-850 hover:bg-pine-800 active:scale-95 text-white font-bold text-xs sm:text-sm border-2 border-pine-700 hover:border-emerald-400 transition-all shadow-sm shrink-0 cursor-pointer" title="Открыть корзину">
+          <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
           <span class="hidden sm:inline">Корзина</span>
-          <span id="cartCountBadge" class="w-5 h-5 rounded-full bg-white text-pine-900 text-xs flex items-center justify-center font-black shadow-xs">0</span>
+          <span id="cartCountBadge" class="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-white text-pine-900 text-[10px] sm:text-xs flex items-center justify-center font-black shadow-xs">0</span>
+        </button>
+
+        <!-- Mobile Menu Toggle Button -->
+        <button id="mobileNavToggleBtn" onclick="toggleMobileNav()" class="xl:hidden h-9 w-9 sm:h-11 sm:w-11 inline-flex items-center justify-center rounded-xl bg-white hover:bg-stone-50 text-stone-700 border-2 border-stone-200 active:scale-95 transition-all cursor-pointer shadow-xs" title="Открыть меню навигации">
+          <svg id="hamburgerIcon" class="w-5 h-5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+          <svg id="closeMenuIcon" class="w-5 h-5 hidden transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>
       </div>
+
+    </div>
+
+    <!-- Mobile Navigation Drawer -->
+    <div id="mobileNavDrawer" class="hidden xl:hidden border-t border-botanic-border bg-white/98 backdrop-blur-xl px-4 py-3.5 shadow-xl animate-slide-down">
+      <div class="space-y-1">
+        <a href="#catalog" onclick="toggleMobileNav(false)" class="flex items-center justify-between p-2.5 rounded-xl hover:bg-pine-50 text-stone-800 font-bold text-sm transition-colors">
+          <span class="flex items-center gap-2.5"><span>🌲</span> Каталог саженцев</span>
+          <span class="text-xs text-stone-400">→</span>
+        </a>
+        <a href="#calculator" onclick="toggleMobileNav(false)" class="flex items-center justify-between p-2.5 rounded-xl hover:bg-pine-50 text-stone-800 font-bold text-sm transition-colors">
+          <span class="flex items-center gap-2.5"><span>📐</span> Калькулятор изгороди</span>
+          <span class="text-xs text-stone-400">→</span>
+        </a>
+        <a href="#about" onclick="toggleMobileNav(false)" class="flex items-center justify-between p-2.5 rounded-xl hover:bg-pine-50 text-stone-800 font-bold text-sm transition-colors">
+          <span class="flex items-center gap-2.5"><span>🏡</span> О питомнике</span>
+          <span class="text-xs text-stone-400">→</span>
+        </a>
+        <a href="#delivery" onclick="toggleMobileNav(false)" class="flex items-center justify-between p-2.5 rounded-xl hover:bg-pine-50 text-stone-800 font-bold text-sm transition-colors">
+          <span class="flex items-center gap-2.5"><span>🚚</span> Доставка и самовывоз</span>
+          <span class="text-xs text-stone-400">→</span>
+        </a>
+        <a href="#contacts" onclick="toggleMobileNav(false)" class="flex items-center justify-between p-2.5 rounded-xl hover:bg-pine-50 text-stone-800 font-bold text-sm transition-colors">
+          <span class="flex items-center gap-2.5"><span>📞</span> Контакты питомника</span>
+          <span class="text-xs text-stone-400">→</span>
+        </a>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2 my-2">
+        <a href="https://t.me/hvoinyimir" target="_blank" rel="noopener noreferrer" class="flex items-center justify-center gap-1.5 p-2 rounded-xl bg-sky-50 text-sky-800 border border-sky-200 text-xs font-bold transition-colors">
+          <span>✈️ Telegram</span>
+        </a>
+        <a href="https://vk.ru/xvoinyimir" target="_blank" rel="noopener noreferrer" class="flex items-center justify-center gap-1.5 p-2 rounded-xl bg-blue-50 text-blue-800 border border-blue-200 text-xs font-bold transition-colors">
+          <span>VK Группа</span>
+        </a>
+      </div>
+      <div class="pt-2.5 border-t border-stone-100 flex items-center justify-between gap-3 bg-pine-50/80 p-3 rounded-xl border border-pine-200/90">
+        <div>
+          <div class="text-[10px] text-stone-500 font-medium">Связь с питомником:</div>
+          <a href="tel:+79602036065" class="text-sm font-extrabold text-pine-900 block leading-tight">+7 (960) 203-60-65</a>
+        </div>
+        <a href="tel:+79602036065" class="px-3 py-1.5 rounded-lg bg-pine-850 hover:bg-pine-800 text-white font-bold text-xs flex items-center gap-1.5 shadow-xs transition-all">
+          <span>📞 Позвонить</span>
+        </a>
+      </div>
+    </div>
+  </header>
 
     </div>
   </header>
@@ -187,56 +268,56 @@
   <main class="flex-grow">
     
     <!-- HERO SECTION -->
-    <section id="hero" class="relative overflow-hidden pt-12 pb-16 md:py-20 border-b border-botanic-border bg-gradient-to-b from-[#f2f6f3] via-[#f8faf7] to-[#f8faf7]">
+    <section id="hero" class="relative overflow-hidden pt-8 pb-12 sm:pt-12 sm:pb-16 md:py-20 border-b border-botanic-border bg-gradient-to-b from-[#f2f6f3] via-[#f8faf7] to-[#f8faf7]">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
           
           <!-- Hero Text Content -->
-          <div class="lg:col-span-7 space-y-6 text-center lg:text-left">
-            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-pine-200 text-pine-800 text-xs font-semibold shadow-xs">
+          <div class="lg:col-span-7 space-y-4 sm:space-y-6 text-center lg:text-left">
+            <div class="inline-flex items-center gap-2 px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-white border border-pine-200 text-pine-800 text-[11px] sm:text-xs font-semibold shadow-xs">
               <span>🌲 Мини-питомник растений в Новгородской области</span>
             </div>
 
-            <h1 class="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-pine-900 tracking-tight leading-[1.18]">
+            <h1 class="text-2xl xs:text-3xl sm:text-5xl lg:text-6xl font-extrabold text-pine-900 tracking-tight leading-[1.18]">
               Здоровые саженцы <br>
               <span class="text-pine-700 font-serif-title italic font-normal">для вашего сада и дачи</span>
             </h1>
 
-            <p class="text-base sm:text-lg text-botanic-muted max-w-2xl mx-auto lg:mx-0 leading-relaxed">
+            <p class="text-sm sm:text-base md:text-lg text-botanic-muted max-w-2xl mx-auto lg:mx-0 leading-relaxed">
               Выращиваем крепкие хвойные породы (туи, ели, можжевельники), сладкую сортовую голубику, клубнику и декоративные травы в индивидуальных контейнерах с закрытой корневой системой (ЗКС). Приживаемость 98%.
             </p>
 
             <!-- Features Pills -->
-            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-2 text-left">
-              <div class="p-4 rounded-2xl bg-white border border-botanic-border shadow-xs">
-                <div class="text-pine-800 font-bold text-sm flex items-center gap-1.5 mb-1">
+            <div class="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3 pt-1 sm:pt-2 text-left">
+              <div class="p-3 sm:p-4 rounded-2xl bg-white border border-botanic-border shadow-xs">
+                <div class="text-pine-800 font-bold text-xs sm:text-sm flex items-center gap-1.5 mb-0.5 sm:mb-1">
                   <span class="text-pine-600">✓</span> ЗКС в горшках
                 </div>
-                <div class="text-xs text-botanic-muted">Посадка с ранней весны до поздней осени без стресса для корней</div>
+                <div class="text-[11px] sm:text-xs text-botanic-muted leading-snug">Посадка с ранней весны до поздней осени без стресса</div>
               </div>
 
-              <div class="p-4 rounded-2xl bg-white border border-botanic-border shadow-xs">
-                <div class="text-pine-800 font-bold text-sm flex items-center gap-1.5 mb-1">
+              <div class="p-3 sm:p-4 rounded-2xl bg-white border border-botanic-border shadow-xs">
+                <div class="text-pine-800 font-bold text-xs sm:text-sm flex items-center gap-1.5 mb-0.5 sm:mb-1">
                   <span class="text-pine-600">❄️</span> 100% Зимостойкость
                 </div>
-                <div class="text-xs text-botanic-muted">Адаптированы к морозам Северо-Запада и средней полосы</div>
+                <div class="text-[11px] sm:text-xs text-botanic-muted leading-snug">Адаптированы к морозам Северо-Запада и средней полосы</div>
               </div>
 
-              <div class="p-4 rounded-2xl bg-white border border-botanic-border shadow-xs col-span-2 sm:col-span-1">
-                <div class="text-pine-800 font-bold text-sm flex items-center gap-1.5 mb-1">
+              <div class="p-3 sm:p-4 rounded-2xl bg-white border border-botanic-border shadow-xs xs:col-span-2 sm:col-span-1">
+                <div class="text-pine-800 font-bold text-xs sm:text-sm flex items-center gap-1.5 mb-0.5 sm:mb-1">
                   <span class="text-pine-600">🚗</span> Бесплатно от <span class="free-delivery-threshold-val">1500</span> ₽
                 </div>
-                <div class="text-xs text-botanic-muted">Быстрая доставка по Великому Новгороду до дверей</div>
+                <div class="text-[11px] sm:text-xs text-botanic-muted leading-snug">Быстрая доставка по Великому Новгороду до дверей</div>
               </div>
             </div>
 
-            <!-- CTA Buttons with crisp border-2 -->
-            <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-3">
-              <a href="#catalog" class="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-pine-800 hover:bg-pine-700 active:scale-95 text-white font-bold text-center shadow-md transition-all flex items-center justify-center gap-2 border-2 border-pine-900 hover:border-emerald-400">
+            <!-- CTA Buttons -->
+            <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 sm:gap-4 pt-2">
+              <a href="#catalog" class="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-3.5 rounded-xl bg-pine-800 hover:bg-pine-700 active:scale-95 text-white font-bold text-center text-sm sm:text-base shadow-md transition-all flex items-center justify-center gap-2 border-2 border-pine-900 hover:border-emerald-400">
                 <span>Выбрать саженцы</span>
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
               </a>
-              <a href="#calculator" class="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-white hover:bg-pine-50 text-pine-900 font-bold border-2 border-pine-200/90 hover:border-pine-400 text-center transition-all shadow-xs">
+              <a href="#calculator" class="w-full sm:w-auto px-5 sm:px-6 py-3 sm:py-3.5 rounded-xl bg-white hover:bg-pine-50 text-pine-900 font-bold border-2 border-pine-200/90 hover:border-pine-400 text-center text-sm sm:text-base transition-all shadow-xs">
                 Калькулятор изгороди
               </a>
             </div>
@@ -244,41 +325,40 @@
 
           <!-- Hero Image & Showcase Card -->
           <div class="lg:col-span-5 relative">
-            <div class="relative rounded-3xl overflow-hidden border-2 border-pine-200/90 shadow-xl bg-white group">
+            <div class="relative rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-pine-200/90 shadow-xl bg-white group">
               <!-- Official Nursery Showcase Hero Image (Season Hit Plant Photo) -->
               <img id="heroCoverImg" src="assets/plants/plant_smaragd.jpg" 
                    onerror="this.onerror=null; this.src='assets/plants/plant_smaragd.jpg';"
                    alt="Питомник Хвойный мир" 
-                   style="min-height: 340px; height: 384px; width: 100%; object-fit: cover; display: block;"
-                   class="w-full h-80 sm:h-96 object-cover group-hover:scale-105 transition-transform duration-700">
+                   class="w-full h-72 sm:h-96 object-cover group-hover:scale-105 transition-transform duration-700 block">
               
               <div class="absolute inset-0 pointer-events-none" style="background: linear-gradient(to top, rgba(10, 29, 20, 0.75) 0%, rgba(10, 29, 20, 0.2) 35%, transparent 60%);"></div>
 
-              <!-- Floating social pill (Placed in top-right so it NEVER overlaps the bottom season hit card) -->
+              <!-- Floating social pill -->
               <a href="https://vk.ru/xvoinyimir" id="heroVkLink" target="_blank" rel="noopener noreferrer" 
-                 class="absolute top-4 right-4 z-20 flex items-center gap-2.5 px-3.5 py-2.5 bg-white/95 backdrop-blur-md border-2 border-pine-200/90 rounded-2xl shadow-md transition-all hover:bg-white hover:scale-[1.02] group">
-                <div class="w-8 h-8 rounded-xl bg-[#0077ff] text-white flex items-center justify-center font-black text-xs shadow-xs shrink-0">
+                 class="absolute top-3 right-3 sm:top-4 sm:right-4 z-20 flex items-center gap-2 sm:gap-2.5 px-3 py-2 sm:px-3.5 sm:py-2.5 bg-white/95 backdrop-blur-md border-2 border-pine-200/90 rounded-xl sm:rounded-2xl shadow-md transition-all hover:bg-white hover:scale-[1.02] group">
+                <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-[#0077ff] text-white flex items-center justify-center font-black text-xs shadow-xs shrink-0">
                   VK
                 </div>
                 <div class="text-left">
                   <div class="text-xs font-bold text-pine-950 leading-tight">2 480+ садоводов</div>
-                  <span class="text-[11px] text-pine-700 font-semibold group-hover:underline">в группе ВКонтакте →</span>
+                  <span class="text-[10px] sm:text-[11px] text-pine-700 font-semibold group-hover:underline">в группе ВКонтакте →</span>
                 </div>
               </a>
 
               <!-- Overlay Card on Hero Image (Season Hit) -->
-              <div id="heroSeasonHitCard" class="absolute bottom-4 left-4 right-4 p-3 sm:p-4 rounded-2xl bg-white/95 backdrop-blur-md border-2 border-pine-200/90 shadow-lg flex items-center gap-3 sm:gap-4 z-10">
-                <div class="relative w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden border-2 border-pine-200/90 shrink-0 bg-stone-100 shadow-xs">
+              <div id="heroSeasonHitCard" class="absolute bottom-3 left-3 right-3 sm:bottom-4 sm:left-4 sm:right-4 p-2.5 sm:p-4 rounded-xl sm:rounded-2xl bg-white/95 backdrop-blur-md border-2 border-pine-200/90 shadow-lg flex items-center gap-2.5 sm:gap-4 z-10">
+                <div class="relative w-12 h-12 sm:w-16 sm:h-16 rounded-xl overflow-hidden border-2 border-pine-200/90 shrink-0 bg-stone-100 shadow-xs">
                   <img id="heroSeasonHitImg" src="assets/plants/plant_smaragd.jpg" alt="Туя западная «Смарагд»" class="w-full h-full object-cover">
                 </div>
                 <div class="min-w-0 flex-1">
-                  <div class="inline-block text-[10px] uppercase tracking-wider font-extrabold px-2 py-0.5 rounded-md bg-pine-100 text-pine-900 border border-pine-200/80 mb-0.5">Сезонный хит</div>
-                  <div id="heroSeasonHitName" class="text-pine-950 font-bold text-sm sm:text-base leading-tight truncate">Туя западная «Смарагд»</div>
-                  <div id="heroSeasonHitDesc" class="text-xs text-stone-600 truncate mt-0.5">Идеальная пирамида, ЗКС C2 • круглый год изумрудная</div>
+                  <div class="inline-block text-[9px] sm:text-[10px] uppercase tracking-wider font-extrabold px-1.5 py-0.5 rounded-md bg-pine-100 text-pine-900 border border-pine-200/80 mb-0.5">Сезонный хит</div>
+                  <div id="heroSeasonHitName" class="text-pine-950 font-bold text-xs sm:text-base leading-tight truncate">Туя западная «Смарагд»</div>
+                  <div id="heroSeasonHitDesc" class="text-[11px] sm:text-xs text-stone-600 truncate mt-0.5">Идеальная пирамида, ЗКС C2 • круглый год изумрудная</div>
                 </div>
                 <div class="text-right shrink-0">
-                  <div id="heroSeasonHitPrice" class="text-sm sm:text-base font-extrabold text-pine-800">от 550 ₽</div>
-                  <button id="heroSeasonHitBtn" onclick="addToCart(1)" class="mt-1 text-xs px-3 sm:px-3.5 py-1.5 bg-pine-800 hover:bg-pine-700 active:scale-95 text-white font-bold rounded-xl transition-all shadow-xs border-2 border-pine-700 hover:border-emerald-400 cursor-pointer whitespace-nowrap">
+                  <div id="heroSeasonHitPrice" class="text-xs sm:text-base font-extrabold text-pine-800">от 550 ₽</div>
+                  <button id="heroSeasonHitBtn" onclick="addToCart(1)" class="mt-1 text-[11px] sm:text-xs px-2.5 sm:px-3.5 py-1.5 bg-pine-800 hover:bg-pine-700 active:scale-95 text-white font-bold rounded-lg sm:rounded-xl transition-all shadow-xs border-2 border-pine-700 hover:border-emerald-400 cursor-pointer whitespace-nowrap">
                     + В корзину
                   </button>
                 </div>
@@ -291,14 +371,14 @@
     </section>
 
     <!-- CATALOG & FILTER SECTION -->
-    <section id="catalog" class="py-14 md:py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="catalog" class="py-10 sm:py-14 md:py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       
       <!-- Section Header -->
-      <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 sm:gap-6 mb-6 sm:mb-8">
         <div>
           <span class="text-xs font-bold uppercase tracking-wider text-pine-700">Ассортимент питомника</span>
-          <h2 class="text-3xl font-extrabold text-pine-900 tracking-tight mt-1">Каталог саженцев</h2>
-          <p class="text-botanic-muted text-sm mt-1">Все растения в индивидуальных контейнерах с закрытой корневой системой (ЗКС)</p>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-pine-900 tracking-tight mt-1">Каталог саженцев</h2>
+          <p class="text-botanic-muted text-xs sm:text-sm mt-1">Все растения в индивидуальных контейнерах с закрытой корневой системой (ЗКС)</p>
         </div>
 
         <!-- Real-time Search Input -->
@@ -312,30 +392,30 @@
         </div>
       </div>
 
-      <!-- Category Filter Pills with Unified Crisp Borders (border-2) -->
-      <div class="flex items-center gap-2.5 overflow-x-auto pb-3 mb-8 scrollbar-none" id="categoryFilterContainer">
-        <button onclick="setCategory('all')" data-cat="all" class="cat-pill px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap bg-pine-800 text-white shadow-xs border-2 border-pine-900 cursor-pointer">
+      <!-- Category Filter Pills with Swipeable Native Mobile Scroll Strip -->
+      <div class="flex items-center gap-2 overflow-x-auto pb-2.5 mb-6 sm:mb-8 no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0" id="categoryFilterContainer">
+        <button onclick="setCategory('all')" data-cat="all" class="cat-pill px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap bg-pine-800 text-white shadow-xs border-2 border-pine-900 cursor-pointer shrink-0">
           Все растения (<span id="count-all">25</span>)
         </button>
-        <button onclick="setCategory('conifer')" data-cat="conifer" class="cat-pill px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap bg-white hover:bg-stone-50 text-stone-700 border-2 border-pine-200/90 hover:border-pine-400 shadow-2xs cursor-pointer">
+        <button onclick="setCategory('conifer')" data-cat="conifer" class="cat-pill px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap bg-white hover:bg-stone-50 text-stone-700 border-2 border-pine-200/90 hover:border-pine-400 shadow-2xs cursor-pointer shrink-0">
           🌲 Хвойные породы
         </button>
-        <button onclick="setCategory('blueberry')" data-cat="blueberry" class="cat-pill px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap bg-white hover:bg-stone-50 text-stone-700 border-2 border-pine-200/90 hover:border-pine-400 shadow-2xs cursor-pointer">
+        <button onclick="setCategory('blueberry')" data-cat="blueberry" class="cat-pill px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap bg-white hover:bg-stone-50 text-stone-700 border-2 border-pine-200/90 hover:border-pine-400 shadow-2xs cursor-pointer shrink-0">
           🫐 Сортовая голубика
         </button>
-        <button onclick="setCategory('shrub')" data-cat="shrub" class="cat-pill px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap bg-white hover:bg-stone-50 text-stone-700 border-2 border-pine-200/90 hover:border-pine-400 shadow-2xs cursor-pointer">
+        <button onclick="setCategory('shrub')" data-cat="shrub" class="cat-pill px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap bg-white hover:bg-stone-50 text-stone-700 border-2 border-pine-200/90 hover:border-pine-400 shadow-2xs cursor-pointer shrink-0">
           🌿 Сирень, ирга и кустарники
         </button>
-        <button onclick="setCategory('grass')" data-cat="grass" class="cat-pill px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap bg-white hover:bg-stone-50 text-stone-700 border-2 border-pine-200/90 hover:border-pine-400 shadow-2xs cursor-pointer">
+        <button onclick="setCategory('grass')" data-cat="grass" class="cat-pill px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap bg-white hover:bg-stone-50 text-stone-700 border-2 border-pine-200/90 hover:border-pine-400 shadow-2xs cursor-pointer shrink-0">
           🌾 Декоративные травы
         </button>
-        <button onclick="setCategory('strawberry')" data-cat="strawberry" class="cat-pill px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap bg-white hover:bg-stone-50 text-stone-700 border-2 border-pine-200/90 hover:border-pine-400 shadow-2xs cursor-pointer">
+        <button onclick="setCategory('strawberry')" data-cat="strawberry" class="cat-pill px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap bg-white hover:bg-stone-50 text-stone-700 border-2 border-pine-200/90 hover:border-pine-400 shadow-2xs cursor-pointer shrink-0">
           🍓 Клубника
         </button>
       </div>
 
       <!-- Products Grid -->
-      <div id="plantsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div id="plantsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
         <!-- Injected via JavaScript -->
       </div>
 
@@ -782,8 +862,8 @@
               <div class="p-3 sm:p-4 bg-white border-t border-botanic-border">
                 <form onsubmit="event.preventDefault(); sendBotQuery();" class="flex items-center gap-2">
                   <input type="text" id="botQueryInput" placeholder="Задайте вопрос агроному (например, 'как сажать смарагд' или 'цена')..." class="flex-1 h-11 px-4 text-xs sm:text-sm rounded-xl border-2 border-stone-200 focus:outline-none focus:border-pine-700 bg-white text-stone-900 placeholder:text-stone-400 transition-colors shadow-2xs">
-                  <button type="submit" class="h-11 px-5 rounded-xl bg-pine-850 hover:bg-pine-800 active:scale-95 text-white font-bold text-xs sm:text-sm border-2 border-pine-700 hover:border-emerald-400 transition-all shadow-sm shrink-0 cursor-pointer flex items-center gap-2">
-                    <span>Отправить</span>
+                  <button type="submit" class="h-11 px-3.5 sm:px-5 rounded-xl bg-pine-850 hover:bg-pine-800 active:scale-95 text-white font-bold text-xs sm:text-sm border-2 border-pine-700 hover:border-emerald-400 transition-all shadow-sm shrink-0 cursor-pointer flex items-center gap-1.5 sm:gap-2">
+                    <span class="hidden sm:inline">Отправить</span>
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                   </button>
                 </form>
@@ -891,13 +971,13 @@
   </main>
 
   <!-- FLOATING BOT ASSISTANT BUTTON (FAB) -->
-  <div id="floatingAssistantWidget" class="fixed bottom-6 right-6 z-40 flex items-center transition-all duration-300 ease-out">
+  <div id="floatingAssistantWidget" class="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 flex items-center transition-all duration-300 ease-out">
     <button onclick="scrollToAssistantChat()" class="flex items-center gap-2.5 px-4 py-3 rounded-full bg-pine-900/95 hover:bg-pine-800 text-white shadow-xl hover:shadow-2xl border-2 border-emerald-400/50 hover:border-emerald-300 backdrop-blur-md transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer group" title="Задать вопрос агроному онлайн">
       <span class="relative flex h-2.5 w-2.5">
         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
         <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
       </span>
-      <span class="text-xs sm:text-sm font-bold tracking-tight">💬 Вопросы & Агроном</span>
+      <span class="text-xs sm:text-sm font-bold tracking-tight">💬 <span class="hidden xs:inline">Вопросы & </span>Агроном</span>
     </button>
   </div>
 
@@ -934,7 +1014,7 @@
     <div onclick="closeCart()" class="absolute inset-0 bg-stone-900/50 backdrop-blur-xs transition-opacity"></div>
 
     <div class="fixed inset-y-0 right-0 max-w-full flex pl-10">
-      <div class="w-screen max-w-md bg-white border-l border-botanic-border shadow-2xl flex flex-col">
+      <div class="w-screen max-w-full sm:max-w-md bg-white border-l border-botanic-border shadow-2xl flex flex-col h-full">
         
         <!-- Cart Header -->
         <div class="p-6 border-b border-botanic-border flex items-center justify-between bg-pine-50/50">
@@ -1088,83 +1168,83 @@
     <!-- Semi-transparent backdrop -->
     <div onclick="closePlantDetailModal()" class="fixed inset-0 bg-stone-900/60 backdrop-blur-xs transition-opacity"></div>
 
-    <div class="min-h-full flex items-center justify-center p-3 sm:p-4 text-center">
-      <div class="relative bg-white rounded-3xl max-w-3xl w-full text-left shadow-2xl border-2 border-pine-200/90 overflow-hidden my-6 transition-all">
+    <div class="min-h-full flex items-center justify-center p-2.5 sm:p-4 text-center">
+      <div class="relative bg-white rounded-2xl sm:rounded-3xl max-w-3xl w-full text-left shadow-2xl border-2 border-pine-200/90 overflow-hidden my-auto max-h-[92vh] flex flex-col md:flex-row transition-all">
         
         <!-- Close Button -->
-        <button onclick="closePlantDetailModal()" class="absolute top-4 right-4 z-20 w-10 h-10 rounded-full bg-white/90 hover:bg-white text-stone-600 hover:text-pine-900 border border-stone-200 flex items-center justify-center transition-all shadow-sm cursor-pointer hover:rotate-90 duration-200" title="Закрыть (Esc)">
+        <button onclick="closePlantDetailModal()" class="absolute top-3 right-3 sm:top-4 sm:right-4 z-30 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/95 backdrop-blur-md hover:bg-white text-stone-600 hover:text-pine-900 border border-stone-200 flex items-center justify-center transition-all shadow-md cursor-pointer hover:rotate-90 duration-200" title="Закрыть (Esc)">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>
 
-        <div class="grid grid-cols-1 md:grid-cols-12 gap-0">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-0 w-full overflow-y-auto">
           
           <!-- Image Column (5 cols) -->
-          <div class="md:col-span-5 bg-stone-100 relative min-h-[280px] md:min-h-full flex items-center justify-center overflow-hidden group">
+          <div class="md:col-span-5 bg-stone-100 relative h-48 sm:h-64 md:h-auto md:min-h-full flex items-center justify-center overflow-hidden group shrink-0">
             <img id="detailPlantImage" src="" alt="" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
             
             <!-- Badges -->
-            <div class="absolute top-4 left-4 flex flex-col gap-1.5 items-start">
-              <span id="detailPlantBadge" class="text-xs font-bold px-3 py-1 rounded-full bg-white/95 backdrop-blur-xs text-pine-900 border border-pine-200/90 shadow-xs">
+            <div class="absolute top-3 left-3 sm:top-4 sm:left-4 flex flex-col gap-1.5 items-start z-10">
+              <span id="detailPlantBadge" class="text-[11px] sm:text-xs font-bold px-2.5 sm:px-3 py-1 rounded-full bg-white/95 backdrop-blur-xs text-pine-900 border border-pine-200/90 shadow-xs">
                 Сезонный хит
               </span>
-              <span id="detailPlantCategoryBadge" class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-pine-800 text-white shadow-xs">
+              <span id="detailPlantCategoryBadge" class="text-[10px] sm:text-[11px] font-bold px-2 sm:px-2.5 py-0.5 rounded-full bg-pine-800 text-white shadow-xs">
                 Хвойные породы
               </span>
             </div>
-            <div class="absolute bottom-4 left-4 right-4 flex items-center justify-between text-xs text-white">
-              <span id="detailPlantPot" class="px-2.5 py-1 rounded-xl bg-stone-900/80 backdrop-blur-xs font-semibold border border-white/10">C2 (ЗКС)</span>
-              <span id="detailPlantFrost" class="px-2.5 py-1 rounded-xl bg-stone-900/80 backdrop-blur-xs font-semibold border border-white/10">❄️ -40°C</span>
+            <div class="absolute bottom-3 left-3 right-3 sm:bottom-4 sm:left-4 sm:right-4 flex items-center justify-between text-xs text-white z-10">
+              <span id="detailPlantPot" class="px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-xl bg-stone-900/80 backdrop-blur-xs font-semibold border border-white/10 text-[11px] sm:text-xs">C2 (ЗКС)</span>
+              <span id="detailPlantFrost" class="px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-xl bg-stone-900/80 backdrop-blur-xs font-semibold border border-white/10 text-[11px] sm:text-xs">❄️ -40°C</span>
             </div>
           </div>
 
           <!-- Content Column (7 cols) -->
-          <div class="md:col-span-7 p-6 sm:p-8 flex flex-col justify-between space-y-4">
+          <div class="md:col-span-7 p-4 sm:p-6 md:p-8 flex flex-col justify-between space-y-3 sm:space-y-4">
             <div>
-              <div class="text-xs font-mono italic text-pine-700 font-semibold mb-1" id="detailPlantLatin">
+              <div class="text-[11px] sm:text-xs font-mono italic text-pine-700 font-semibold mb-1" id="detailPlantLatin">
                 Thuja occidentalis
               </div>
-              <h3 class="text-xl sm:text-2xl font-extrabold text-pine-950 tracking-tight leading-tight" id="detailPlantName">
+              <h3 class="text-lg sm:text-2xl font-extrabold text-pine-950 tracking-tight leading-tight" id="detailPlantName">
                 Название саженца
               </h3>
 
               <!-- Stock & Price Row -->
-              <div class="flex items-center justify-between gap-3 mt-3 pb-3 border-b border-botanic-border">
-                <div class="flex items-baseline gap-2">
+              <div class="flex items-center justify-between gap-3 mt-2 sm:mt-3 pb-2.5 sm:pb-3 border-b border-botanic-border">
+                <div class="flex items-baseline gap-1.5 sm:gap-2">
                   <span class="text-2xl sm:text-3xl font-black text-pine-900" id="detailPlantPrice">550 ₽</span>
                   <span class="text-xs text-stone-400 font-medium">/ саженец</span>
                 </div>
                 <div id="detailPlantStockBadge">
-                  <span class="px-3 py-1 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-bold text-emerald-800">✓ В наличии</span>
+                  <span class="px-2.5 sm:px-3 py-1 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-bold text-emerald-800">✓ В наличии</span>
                 </div>
               </div>
 
               <!-- Description -->
-              <div class="mt-3.5 space-y-1.5">
-                <h4 class="text-xs font-bold uppercase tracking-wider text-stone-500">Описание и свойства сорта:</h4>
+              <div class="mt-2.5 sm:mt-3.5 space-y-1 sm:space-y-1.5">
+                <h4 class="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-stone-500">Описание и свойства сорта:</h4>
                 <p id="detailPlantDesc" class="text-xs sm:text-sm text-stone-600 leading-relaxed">
                   Подробное описание растения...
                 </p>
               </div>
 
               <!-- Botanical Specs Grid -->
-              <div class="grid grid-cols-2 gap-2 mt-4 text-xs">
-                <div class="p-2.5 rounded-xl bg-pine-50/70 border border-pine-200/60">
-                  <span class="text-stone-500 block text-[10px] uppercase font-bold">Высота саженца</span>
-                  <span id="detailPlantHeight" class="font-bold text-pine-950 text-xs">40–50 см</span>
+              <div class="grid grid-cols-2 gap-2 mt-3 sm:mt-4 text-xs">
+                <div class="p-2 sm:p-2.5 rounded-xl bg-pine-50/70 border border-pine-200/60">
+                  <span class="text-stone-500 block text-[9px] sm:text-[10px] uppercase font-bold">Высота саженца</span>
+                  <span id="detailPlantHeight" class="font-bold text-pine-950 text-xs sm:text-sm">40–50 см</span>
                 </div>
-                <div class="p-2.5 rounded-xl bg-pine-50/70 border border-pine-200/60">
-                  <span class="text-stone-500 block text-[10px] uppercase font-bold">Корневая система</span>
-                  <span class="font-bold text-pine-950 text-xs">Закрытая (ЗКС в горшке)</span>
+                <div class="p-2 sm:p-2.5 rounded-xl bg-pine-50/70 border border-pine-200/60">
+                  <span class="text-stone-500 block text-[9px] sm:text-[10px] uppercase font-bold">Корневая система</span>
+                  <span class="font-bold text-pine-950 text-xs sm:text-sm">Закрытая (ЗКС)</span>
                 </div>
-                <div class="p-2.5 rounded-xl bg-stone-50 border border-stone-200 col-span-2">
-                  <span class="text-stone-500 block text-[10px] uppercase font-bold">Рекомендация по грунту</span>
+                <div class="p-2 sm:p-2.5 rounded-xl bg-stone-50 border border-stone-200 col-span-2">
+                  <span class="text-stone-500 block text-[9px] sm:text-[10px] uppercase font-bold">Рекомендация по грунту</span>
                   <span id="detailPlantSoilSpec" class="font-bold text-stone-800 text-xs">Дренированная, плодородная почва</span>
                 </div>
               </div>
             </div>
 
             <!-- Footer: Quantity Selector & Actions -->
-            <div class="pt-3 border-t border-botanic-border space-y-3">
+            <div class="pt-2.5 sm:pt-3 border-t border-botanic-border space-y-2.5 sm:space-y-3">
               <div class="flex items-center justify-between gap-3">
                 <div class="flex items-center gap-1.5 bg-stone-100 p-1 rounded-xl border border-stone-200">
                   <button type="button" onclick="changeDetailQty(-1)" class="w-8 h-8 rounded-lg bg-white hover:bg-stone-50 text-stone-800 font-bold flex items-center justify-center transition-all cursor-pointer shadow-2xs">-</button>
@@ -1172,17 +1252,17 @@
                   <button type="button" onclick="changeDetailQty(1)" class="w-8 h-8 rounded-lg bg-white hover:bg-stone-50 text-stone-800 font-bold flex items-center justify-center transition-all cursor-pointer shadow-2xs">+</button>
                 </div>
                 <div class="text-right">
-                  <span class="text-[10px] text-stone-400 block font-semibold uppercase">Сумма:</span>
-                  <span id="detailPlantTotalSum" class="text-lg font-black text-pine-900">550 ₽</span>
+                  <span class="text-[9px] sm:text-[10px] text-stone-400 block font-semibold uppercase">Сумма:</span>
+                  <span id="detailPlantTotalSum" class="text-base sm:text-lg font-black text-pine-900">550 ₽</span>
                 </div>
               </div>
 
               <div class="flex gap-2">
-                <button id="detailAddToCartBtn" onclick="addCurrentDetailToCart()" class="flex-1 py-3 px-4 rounded-xl bg-pine-800 hover:bg-pine-700 active:scale-95 text-white font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 shadow-xs border-2 border-pine-900 hover:border-emerald-400 cursor-pointer">
+                <button id="detailAddToCartBtn" onclick="addCurrentDetailToCart()" class="flex-1 py-3 px-3 sm:px-4 rounded-xl bg-pine-800 hover:bg-pine-700 active:scale-95 text-white font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-1.5 sm:gap-2 shadow-xs border-2 border-pine-900 hover:border-emerald-400 cursor-pointer">
                   <span>🛒 Добавить в корзину</span>
                 </button>
-                <button type="button" onclick="askAgronomistAboutCurrentPlant()" class="py-3 px-3.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border-2 border-emerald-300 font-bold text-xs transition-all cursor-pointer" title="Задать вопрос агроному об этом сорте">
-                  💬 Спросить бота
+                <button type="button" onclick="askAgronomistAboutCurrentPlant()" class="py-3 px-3 sm:px-3.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border-2 border-emerald-300 font-bold text-xs transition-all cursor-pointer shrink-0" title="Задать вопрос агроному об этом сорте">
+                  💬 <span class="hidden xs:inline">Спросить</span> бота
                 </button>
               </div>
             </div>
@@ -4407,6 +4487,23 @@
       `).join('');
     }
 
+    function toggleMobileNav(forceState) {
+      const drawer = document.getElementById('mobileNavDrawer');
+      const hamburger = document.getElementById('hamburgerIcon');
+      const closeIcon = document.getElementById('closeMenuIcon');
+      if (!drawer) return;
+      const willOpen = forceState !== undefined ? forceState : drawer.classList.contains('hidden');
+      if (willOpen) {
+        drawer.classList.remove('hidden');
+        if (hamburger) hamburger.classList.add('hidden');
+        if (closeIcon) closeIcon.classList.remove('hidden');
+      } else {
+        drawer.classList.add('hidden');
+        if (hamburger) hamburger.classList.remove('hidden');
+        if (closeIcon) closeIcon.classList.add('hidden');
+      }
+    }
+
     function showToast(message, type = 'success') {
       const existing = document.getElementById('globalAppToast');
       if (existing && existing.remove) existing.remove();
@@ -4440,7 +4537,7 @@
         iconColor = "text-sky-300";
       }
 
-      toast.className = `fixed bottom-20 right-4 sm:bottom-22 sm:right-6 z-[120] max-w-sm px-4 py-3.5 rounded-2xl border flex items-center gap-3 text-xs sm:text-sm font-semibold transition-all duration-300 ease-out select-none animate-toast-enter ${bgClasses}`;
+      toast.className = `fixed bottom-16 right-3 sm:bottom-22 sm:right-6 z-[120] max-w-[calc(100vw-24px)] sm:max-w-sm px-4 py-3.5 rounded-2xl border flex items-center gap-3 text-xs sm:text-sm font-semibold transition-all duration-300 ease-out select-none animate-toast-enter ${bgClasses}`;
       toast.innerHTML = `
         <span class="${iconColor} font-bold text-lg shrink-0 drop-shadow">${icon}</span>
         <div class="flex-1 min-w-0 leading-snug">
