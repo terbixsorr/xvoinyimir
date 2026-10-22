@@ -2,6 +2,9 @@
 <html lang="ru" class="scroll-smooth">
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
   <title>Хвойный мир — Саженцы хвойных пород, голубики и декоративных культур</title>
   <meta name="description" content="Мини-питомник растений в Великом Новгороде. Здоровые саженцы хвойных пород, голубики, клубники и трав с закрытой корневой системой (ЗКС). Доставка по РФ.">
@@ -5317,15 +5320,22 @@
       }
 
       const name = document.getElementById('orderName').value.trim() || 'Покупатель';
-      const phone = document.getElementById('orderPhone').value.trim();
-      const phoneDigits = phone.replace(/\D/g, '');
-      if (phoneDigits.length < 11) {
-        showToast("Пожалуйста, укажите полный номер телефона: +7 (XXX) XXX-XX-XX", "warning");
+      let phone = document.getElementById('orderPhone').value.trim();
+      let phoneDigits = phone.replace(/\D/g, '');
+      if (phoneDigits.length < 10) {
+        showToast("Пожалуйста, укажите полный номер телефона (от 10 цифр)", "warning");
         if (submitBtn) {
           submitBtn.disabled = false;
           submitBtn.innerHTML = '<span>Подтвердить заказ на сайте</span>';
         }
         return;
+      }
+      // Auto-format Russian phone numbers whether 10 or 11 digits:
+      if (phoneDigits.length === 10) {
+        phone = '+7 (' + phoneDigits.slice(0, 3) + ') ' + phoneDigits.slice(3, 6) + '-' + phoneDigits.slice(6, 8) + '-' + phoneDigits.slice(8, 10);
+      } else if (phoneDigits.length >= 11) {
+        const d = (phoneDigits.startsWith('7') || phoneDigits.startsWith('8')) ? phoneDigits.slice(1, 11) : phoneDigits.slice(0, 10);
+        phone = '+7 (' + d.slice(0, 3) + ') ' + d.slice(3, 6) + '-' + d.slice(6, 8) + '-' + d.slice(8, 10);
       }
       const delivery = document.getElementById('orderDelivery').value;
       const address = document.getElementById('orderAddress')?.value.trim() || '';
@@ -6254,13 +6264,23 @@
 
     function saveOrderToAdmin(orderData) {
       const orders = getOrders();
-      orders.unshift(orderData);
+      const existingIdx = orders.findIndex(o => o.id === orderData.id);
+      if (existingIdx >= 0) {
+        orders[existingIdx] = orderData;
+      } else {
+        orders.unshift(orderData);
+      }
       localStorage.setItem('xvoinyimir_orders', JSON.stringify(orders));
       try {
         localStorage.removeItem('xvoinyimir_orders_cleared');
       } catch(e) {}
       const badge = document.getElementById('adminOrderCountBadge');
       if (badge) badge.innerText = orders.length;
+
+      // AUTOMATICALLY BROADCAST EVERY ORDER TO CLOUD:
+      if (typeof broadcastOrderToCloud === 'function') {
+        broadcastOrderToCloud(orderData);
+      }
     }
 
     function filterAdminOrdersByStatus(status) {
@@ -7188,112 +7208,205 @@
 
 
     // ==========================================
-    // REAL-TIME CLOUD SYNC ENGINE (NTFY REALTIME BROKER)
+    // REAL-TIME CLOUD SYNC ENGINE (BULLETPROOF MULTI-DEVICE & DUAL-TOPIC BROKER)
     // ==========================================
     const DEFAULT_CLOUD_TOPIC = 'xvoinyimir_orders_live_sync_v1';
+    const BACKUP_CLOUD_TOPIC = 'xvoinyimir_orders_live_sync_v2';
 
     function getCloudTopic() {
       return (siteSettings && siteSettings.cloudSyncTopic) ? siteSettings.cloudSyncTopic : DEFAULT_CLOUD_TOPIC;
     }
 
-    function broadcastOrderToCloud(orderData) {
-      const topic = getCloudTopic();
+    // Strip bulky fields (descriptions, full gallery photo arrays) so payload is < 400 bytes and NEVER converted to attachment!
+    function prepareOrderForCloud(orderData) {
+      if (!orderData) return null;
+      return {
+        id: orderData.id,
+        date: orderData.date,
+        type: orderData.type || 'Заказ товаров',
+        name: orderData.name || 'Покупатель',
+        phone: orderData.phone || '',
+        delivery: orderData.delivery || '',
+        interest: orderData.interest || '',
+        total: orderData.total || 0,
+        status: orderData.status || 'Новый',
+        items: (orderData.items || []).map(i => ({
+          id: i.id || 1,
+          name: i.name || 'Растение',
+          price: i.price || 0,
+          qty: i.qty || 1,
+          image: i.image || ''
+        }))
+      };
+    }
+
+    // Persistent Outbox Queue in localStorage so orders are NEVER lost on mobile disconnects
+    function getPendingCloudOrders() {
       try {
-        fetch('https://ntfy.sh/' + topic, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(orderData)
-        }).then(res => {
-          console.log('Order broadcasted to cloud broker:', orderData.id, res.status);
-        }).catch(err => {
-          console.warn('Cloud broadcast network error:', err);
-        });
+        return JSON.parse(localStorage.getItem('xvoinyimir_pending_cloud_orders') || '[]');
+      } catch(e) { return []; }
+    }
+
+    function savePendingCloudOrder(cleanOrder) {
+      try {
+        const list = getPendingCloudOrders();
+        if (!list.find(o => o.id === cleanOrder.id)) {
+          list.push(cleanOrder);
+          localStorage.setItem('xvoinyimir_pending_cloud_orders', JSON.stringify(list));
+        }
       } catch(e) {}
+    }
+
+    function removePendingCloudOrder(id) {
+      try {
+        let list = getPendingCloudOrders();
+        list = list.filter(o => o.id !== id);
+        localStorage.setItem('xvoinyimir_pending_cloud_orders', JSON.stringify(list));
+      } catch(e) {}
+    }
+
+    function broadcastOrderToCloud(orderData) {
+      if (!orderData || !orderData.id) return;
+      const cleanOrder = prepareOrderForCloud(orderData);
+      if (!cleanOrder) return;
+
+      // 1. Save to pending outbox
+      savePendingCloudOrder(cleanOrder);
+
+      // 2. Broadcast with keepalive:true across primary and backup topics
+      const topics = [getCloudTopic(), BACKUP_CLOUD_TOPIC];
+      const payload = JSON.stringify(cleanOrder);
+
+      topics.forEach(t => {
+        try {
+          fetch('https://ntfy.sh/' + t, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: payload,
+            keepalive: true
+          }).then(res => {
+            if (res.ok) {
+              removePendingCloudOrder(cleanOrder.id);
+              console.log('✓ Order broadcasted to cloud broker (' + t + '):', cleanOrder.id);
+            }
+          }).catch(err => {
+            console.warn('Cloud broadcast network error for topic ' + t + ':', err);
+          });
+        } catch(e) {}
+      });
+    }
+
+    function flushPendingCloudOrders() {
+      const pending = getPendingCloudOrders();
+      if (!pending || pending.length === 0) return;
+      pending.forEach((ord, idx) => {
+        setTimeout(() => {
+          const payload = JSON.stringify(ord);
+          [getCloudTopic(), BACKUP_CLOUD_TOPIC].forEach(t => {
+            try {
+              fetch('https://ntfy.sh/' + t, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: payload,
+                keepalive: true
+              }).then(res => {
+                if (res.ok) removePendingCloudOrder(ord.id);
+              }).catch(() => {});
+            } catch(e) {}
+          });
+        }, idx * 300);
+      });
     }
 
     function broadcastLocalOrdersToCloud() {
       const orders = getOrders();
       if (!Array.isArray(orders) || orders.length === 0) return;
-      // Broadcast recent orders to cloud so other devices immediately receive them
-      orders.slice(0, 10).forEach(ord => {
-        broadcastOrderToCloud(ord);
+      orders.slice(0, 5).forEach((ord, idx) => {
+        setTimeout(() => broadcastOrderToCloud(ord), idx * 300);
       });
-      showToast('☁️ Заказы отправлены в облако для синхронизации с компьютером!', 'info');
+      showToast('☁️ Последние заказы отправлены в облако для синхронизации!', 'info');
     }
 
     async function syncOrdersFromLiveCloud(manual = false) {
-      const topic = getCloudTopic();
       if (manual) showToast('Проверка новых заказов в облаке...', 'info');
 
-      try {
-        const res = await fetch('https://ntfy.sh/' + topic + '/json?poll=1&since=all');
-        if (!res.ok) {
-          if (manual) showToast('Облачный сервер временно недоступен', 'warning');
-          return;
-        }
-        const text = await res.text();
-        if (!text.trim()) {
-          if (manual) showToast('В облаке пока нет новых заказов', 'info');
-          return;
-        }
+      // Flush any local pending orders first
+      flushPendingCloudOrders();
 
-        const lines = text.trim().split('\n');
-        const currentOrders = getOrders();
-        const existingIds = new Set(currentOrders.map(o => o.id));
-        let addedCount = 0;
+      const topics = [getCloudTopic(), BACKUP_CLOUD_TOPIC];
+      const currentOrders = getOrders();
+      let addedCount = 0;
 
-        lines.forEach(line => {
-          try {
-            const record = JSON.parse(line);
-            let orderObj = null;
-            if (record.message) {
-              orderObj = typeof record.message === 'string' ? JSON.parse(record.message) : record.message;
-            }
-            if (orderObj && orderObj.id) {
-              const existing = currentOrders.find(o => o.id === orderObj.id);
-              if (existing) {
-                if (orderObj.status && existing.status !== orderObj.status) {
-                  existing.status = orderObj.status;
+      for (const t of topics) {
+        try {
+          const res = await fetch('https://ntfy.sh/' + t + '/json?poll=1&since=all');
+          if (!res.ok) continue;
+          const text = await res.text();
+          if (!text.trim()) continue;
+
+          const lines = text.trim().split('\n');
+          for (const line of lines) {
+            try {
+              const record = JSON.parse(line);
+              let orderObj = null;
+
+              if (record.message) {
+                try {
+                  orderObj = typeof record.message === 'string' ? JSON.parse(record.message) : record.message;
+                } catch(e) {}
+              }
+
+              // Fallback if ntfy ever attached as file
+              if (!orderObj && record.attachment && record.attachment.url) {
+                try {
+                  const attRes = await fetch(record.attachment.url);
+                  if (attRes.ok) orderObj = await attRes.json();
+                } catch(e) {}
+              }
+
+              if (orderObj && orderObj.id) {
+                const existing = currentOrders.find(o => o.id === orderObj.id);
+                if (existing) {
+                  if (orderObj.status && existing.status !== orderObj.status) {
+                    existing.status = orderObj.status;
+                    addedCount++;
+                  }
+                } else {
+                  currentOrders.unshift(orderObj);
                   addedCount++;
                 }
-              } else {
-                currentOrders.unshift(orderObj);
-                existingIds.add(orderObj.id);
-                addedCount++;
               }
-            }
-          } catch(e) {}
-        });
-
-        if (addedCount > 0) {
-          localStorage.setItem('xvoinyimir_orders', JSON.stringify(currentOrders));
-          renderAdminOrdersTable();
-          const badge = document.getElementById('adminOrderCountBadge');
-          if (badge) badge.innerText = currentOrders.length;
-          
-          if (document.getElementById('userProfileModal') && !document.getElementById('userProfileModal').classList.contains('hidden')) {
-            renderProfileOrders();
+            } catch(e) {}
           }
-
-          // NO REPETITIVE BACKGROUND TOASTS! Toast ONLY if user explicitly triggered manual sync:
-          if (manual) {
-            showToast(`✓ Синхронизировано новых заказов из облака: ${addedCount}!`, 'success');
-          }
-        } else if (manual) {
-          showToast('✓ Все заказы с телефона и других устройств уже синхронизированы!', 'success');
+        } catch(e) {
+          console.warn('Sync topic fetch error:', e);
         }
-      } catch(e) {
-        console.warn('Live cloud sync fetch failed:', e);
-        if (manual) showToast('Ошибка синхронизации: ' + e.message, 'warning');
+      }
+
+      if (addedCount > 0) {
+        localStorage.setItem('xvoinyimir_orders', JSON.stringify(currentOrders));
+        renderAdminOrdersTable();
+        const badge = document.getElementById('adminOrderCountBadge');
+        if (badge) badge.innerText = currentOrders.length;
+        
+        if (document.getElementById('userProfileModal') && !document.getElementById('userProfileModal').classList.contains('hidden')) {
+          renderProfileOrders();
+        }
+
+        if (manual) {
+          showToast(`✓ Синхронизировано новых заказов из облака: ${addedCount}!`, 'success');
+        }
+      } else if (manual) {
+        showToast('✓ Все заказы с телефонов и других устройств актуальны (' + currentOrders.length + ' заказов в базе)', 'success');
       }
     }
 
     function initLiveCloudSync() {
       const topic = getCloudTopic();
 
-      // 1. Connect real-time Server-Sent Events (SSE) stream
+      // 1. Connect real-time Server-Sent Events (SSE) stream for instant updates
       if (window.EventSource) {
         try {
           const sse = new EventSource('https://ntfy.sh/' + topic + '/sse');
@@ -7301,7 +7414,11 @@
             try {
               const data = JSON.parse(event.data);
               if (data.event === 'message' && data.message) {
-                const incomingOrder = typeof data.message === 'string' ? JSON.parse(data.message) : data.message;
+                let incomingOrder = null;
+                try {
+                  incomingOrder = typeof data.message === 'string' ? JSON.parse(data.message) : data.message;
+                } catch(e) {}
+
                 if (incomingOrder && incomingOrder.id) {
                   const orders = getOrders();
                   const existing = orders.find(o => o.id === incomingOrder.id);
@@ -7346,20 +7463,20 @@
       // 2. Poll immediately on load
       syncOrdersFromLiveCloud(false);
 
-      // 3. Automatically broadcast any local orders so other devices receive them
+      // 3. Flush any pending unsent orders from this device
       setTimeout(() => {
-        const localOrders = getOrders();
-        if (localOrders && localOrders.length > 0) {
-          localOrders.slice(0, 5).forEach(o => broadcastOrderToCloud(o));
-        }
-      }, 1500);
+        flushPendingCloudOrders();
+      }, 1200);
 
-      // 4. Regular background check every 15 seconds & when switching back to tab
+      // 4. Regular background check every 15 seconds, on window focus, and when coming online
       setInterval(() => syncOrdersFromLiveCloud(false), 15000);
       window.addEventListener('focus', () => syncOrdersFromLiveCloud(false));
+      window.addEventListener('online', () => {
+        flushPendingCloudOrders();
+        syncOrdersFromLiveCloud(false);
+      });
     }
 
-    // ==========================================
     // ROCK-SOLID HEADROOM HEADER (WORKS FROM ANY PART OF THE SITE)
     let lastScrollY = window.pageYOffset || document.documentElement.scrollTop;
     let headroomTouchStartY = 0;
