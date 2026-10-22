@@ -1521,6 +1521,9 @@
               <h4 class="text-sm font-bold text-pine-950 flex items-center gap-1.5">
                 <span>📦</span> Мои заказы и отслеживание
               </h4>
+              <button onclick="syncOrdersFromLiveCloud(true); broadcastLocalOrdersToCloud();" class="text-[11px] text-pine-800 hover:text-emerald-700 font-bold underline cursor-pointer">
+                ☁️ Синхронизировать
+              </button>
               <span class="text-xs text-stone-500">Автообновление статусов</span>
             </div>
 
@@ -1679,6 +1682,25 @@
 
         <!-- TAB 2: ORDERS MANAGEMENT -->
         <div id="adminTabOrders" class="p-6 space-y-4 max-h-[70vh] overflow-y-auto hidden">
+          <!-- Live Cloud Sync Status Banner -->
+          <div id="cloudSyncLiveStatusBar" class="p-3 sm:p-3.5 rounded-2xl bg-gradient-to-r from-emerald-50 via-teal-50 to-pine-50 border-2 border-emerald-200/90 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs mb-3">
+            <div class="flex items-center gap-2.5">
+              <span class="relative flex h-3 w-3 shrink-0">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+              </span>
+              <div>
+                <div class="text-xs font-bold text-pine-950 flex items-center gap-1.5">
+                  <span>Облачная синхронизация между телефоном и компьютером активна</span>
+                </div>
+                <div class="text-[11px] text-stone-500">Заказы с телефонов клиентов моментально поступают сюда в реальном времени</div>
+              </div>
+            </div>
+            <button onclick="syncOrdersFromLiveCloud(true)" class="px-3.5 py-1.5 rounded-xl bg-white hover:bg-emerald-50 text-emerald-900 border-2 border-emerald-300 font-bold text-xs flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer shrink-0">
+              <span>🔄 Обновить заказы из облака</span>
+            </button>
+          </div>
+
           <!-- Order KPI Stats -->
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-2">
             <div class="p-4 rounded-2xl bg-pine-50 border-2 border-pine-200">
@@ -4328,6 +4350,7 @@
       calcHedge();
       loadCart();
       initBotChat();
+      initLiveCloudSync();
 
       // Initialize strict phone masks on all telephone inputs
       initPhoneMask(document.getElementById('orderPhone'));
@@ -5124,6 +5147,7 @@
       };
       saveOrderToAdmin(orderData);
       saveOrderToCustomerProfile(orderData);
+      broadcastOrderToCloud(orderData);
       sendOrderToTelegram(orderData);
 
       // Deduct stock and automatically record sales in reports log
@@ -5333,7 +5357,8 @@
       seasonHitPlantId: 1,
       telegramBotToken: "",
       telegramChatId: "",
-      cloudSyncUrl: ""
+      cloudSyncUrl: "",
+      cloudSyncTopic: "xvoinyimir_orders_live_sync_v1"
     };
 
     let siteSettings = { ...DEFAULT_SETTINGS };
@@ -5590,6 +5615,7 @@
       renderAdminOrdersTable();
       renderAdminReportsTable();
       switchAdminTab('plants');
+      syncOrdersFromLiveCloud(false);
     }
 
     function closeAdminPanelModal() {
@@ -5622,6 +5648,7 @@
       if (tab === 'orders') {
         if (typeof toggleOrderSearchClear === 'function') toggleOrderSearchClear();
         renderAdminOrdersTable();
+        syncOrdersFromLiveCloud(false);
       }
       if (tab === 'reports') {
         if (typeof toggleReportSearchClear === 'function') toggleReportSearchClear();
@@ -6953,6 +6980,154 @@
         .catch(err => {
           showToast('Не удалось загрузить заказы из облака: ' + err.message, 'error');
         });
+    }
+
+
+    // ==========================================
+    // REAL-TIME CLOUD SYNC ENGINE (NTFY REALTIME BROKER)
+    // ==========================================
+    const DEFAULT_CLOUD_TOPIC = 'xvoinyimir_orders_live_sync_v1';
+
+    function getCloudTopic() {
+      return (siteSettings && siteSettings.cloudSyncTopic) ? siteSettings.cloudSyncTopic : DEFAULT_CLOUD_TOPIC;
+    }
+
+    function broadcastOrderToCloud(orderData) {
+      const topic = getCloudTopic();
+      try {
+        fetch('https://ntfy.sh/' + topic, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(orderData)
+        }).then(res => {
+          console.log('Order broadcasted to cloud broker:', orderData.id, res.status);
+        }).catch(err => {
+          console.warn('Cloud broadcast network error:', err);
+        });
+      } catch(e) {}
+    }
+
+    function broadcastLocalOrdersToCloud() {
+      const orders = getOrders();
+      if (!Array.isArray(orders) || orders.length === 0) return;
+      // Broadcast recent orders to cloud so other devices immediately receive them
+      orders.slice(0, 10).forEach(ord => {
+        broadcastOrderToCloud(ord);
+      });
+      showToast('☁️ Заказы отправлены в облако для синхронизации с компьютером!', 'info');
+    }
+
+    async function syncOrdersFromLiveCloud(manual = false) {
+      const topic = getCloudTopic();
+      if (manual) showToast('Проверка новых заказов в облаке...', 'info');
+
+      try {
+        const res = await fetch('https://ntfy.sh/' + topic + '/json?poll=1&since=all');
+        if (!res.ok) {
+          if (manual) showToast('Облачный сервер временно недоступен', 'warning');
+          return;
+        }
+        const text = await res.text();
+        if (!text.trim()) {
+          if (manual) showToast('В облаке пока нет новых заказов', 'info');
+          return;
+        }
+
+        const lines = text.trim().split('\n');
+        const currentOrders = getOrders();
+        const existingIds = new Set(currentOrders.map(o => o.id));
+        let addedCount = 0;
+
+        lines.forEach(line => {
+          try {
+            const record = JSON.parse(line);
+            let orderObj = null;
+            if (record.message) {
+              orderObj = typeof record.message === 'string' ? JSON.parse(record.message) : record.message;
+            }
+            if (orderObj && orderObj.id && !existingIds.has(orderObj.id)) {
+              currentOrders.unshift(orderObj);
+              existingIds.add(orderObj.id);
+              addedCount++;
+            }
+          } catch(e) {}
+        });
+
+        if (addedCount > 0) {
+          localStorage.setItem('xvoinyimir_orders', JSON.stringify(currentOrders));
+          renderAdminOrdersTable();
+          const badge = document.getElementById('adminOrderCountBadge');
+          if (badge) badge.innerText = currentOrders.length;
+          
+          if (document.getElementById('userProfileModal') && !document.getElementById('userProfileModal').classList.contains('hidden')) {
+            renderProfileOrders();
+          }
+
+          showToast(`🔔 Синхронизировано новых заказов из облака: ${addedCount}!`, 'success');
+        } else if (manual) {
+          showToast('✓ Все заказы с телефона и других устройств уже синхронизированы!', 'success');
+        }
+      } catch(e) {
+        console.warn('Live cloud sync fetch failed:', e);
+        if (manual) showToast('Ошибка синхронизации: ' + e.message, 'warning');
+      }
+    }
+
+    function initLiveCloudSync() {
+      const topic = getCloudTopic();
+
+      // 1. Connect real-time Server-Sent Events (SSE) stream
+      if (window.EventSource) {
+        try {
+          const sse = new EventSource('https://ntfy.sh/' + topic + '/sse');
+          sse.onmessage = (event) => {
+            try {
+              const data = JSON.parse(event.data);
+              if (data.event === 'message' && data.message) {
+                const incomingOrder = typeof data.message === 'string' ? JSON.parse(data.message) : data.message;
+                if (incomingOrder && incomingOrder.id) {
+                  const orders = getOrders();
+                  if (!orders.some(o => o.id === incomingOrder.id)) {
+                    orders.unshift(incomingOrder);
+                    localStorage.setItem('xvoinyimir_orders', JSON.stringify(orders));
+                    renderAdminOrdersTable();
+                    const badge = document.getElementById('adminOrderCountBadge');
+                    if (badge) badge.innerText = orders.length;
+
+                    if (document.getElementById('userProfileModal') && !document.getElementById('userProfileModal').classList.contains('hidden')) {
+                      renderProfileOrders();
+                    }
+
+                    showToast(`🔔 Моментальный заказ #${incomingOrder.id} от ${incomingOrder.name} (${(incomingOrder.total||0).toLocaleString('ru-RU')} ₽)!`, 'success');
+                  }
+                }
+              }
+            } catch(err) {
+              console.warn('SSE order parse error:', err);
+            }
+          };
+          sse.onerror = () => {
+            // Reconnect handled automatically by EventSource
+          };
+        } catch(e) {}
+      }
+
+      // 2. Poll immediately on load
+      syncOrdersFromLiveCloud(false);
+
+      // 3. Automatically broadcast any local orders so other devices receive them
+      setTimeout(() => {
+        const localOrders = getOrders();
+        if (localOrders && localOrders.length > 0) {
+          localOrders.slice(0, 5).forEach(o => broadcastOrderToCloud(o));
+        }
+      }, 1500);
+
+      // 4. Regular background check every 15 seconds & when switching back to tab
+      setInterval(() => syncOrdersFromLiveCloud(false), 15000);
+      window.addEventListener('focus', () => syncOrdersFromLiveCloud(false));
     }
 
     // ==========================================
